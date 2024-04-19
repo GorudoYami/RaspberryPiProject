@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RaspberryPi.API.Enums;
 using RaspberryPi.API.Models;
+using RaspberryPi.API.Resolvers;
 using RaspberryPi.API.Services;
 using System.Net;
 
@@ -8,8 +9,8 @@ namespace RaspberryPi.API.Controllers;
 
 [Route("api/leds")]
 [ApiController]
-public class LedController(ILedService ledService) : ControllerBase {
-	private readonly ILedService _ledService = ledService;
+public class LedController(ILedServiceResolver ledServiceResolver) : ControllerBase {
+	private readonly ILedService _ledService = ledServiceResolver.Resolve();
 
 	[HttpPost("effect")]
 	[ProducesResponseType(200)]
