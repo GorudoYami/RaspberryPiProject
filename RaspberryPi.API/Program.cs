@@ -1,8 +1,23 @@
+using RaspberryPi.API.Gpio;
+using RaspberryPi.API.Options;
+using RaspberryPi.API.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services
+	.AddEndpointsApiExplorer()
+	.AddSwaggerGen();
+builder.Services
+	.AddSingleton<ILedService, LedService>()
+	.AddSingleton<IGpioControllerProvider, GpioControllerProvider>();
+
+builder.Services.AddOptions<PinOptions>()
+	.Bind(builder.Configuration.GetRequiredSection(nameof(PinOptions)))
+	.ValidateOnStart();
+builder.Services.AddOptions<LedOptions>()
+	.Bind(builder.Configuration.GetRequiredSection(nameof(LedOptions)))
+	.ValidateOnStart();
 
 var app = builder.Build();
 
