@@ -13,7 +13,8 @@ public class TestLedService
 		Debug.WriteLine($"[{nameof(TestLedService)}]: SetColor {color}");
 	}
 
-	public void SetEffect(Effect effect) {
+	public Task SetEffect(Effect effect) {
 		Debug.WriteLine($"[{nameof(TestLedService)}]: SetEffect {(int)effect} - {effect}");
+		return Task.CompletedTask;
 	}
 }

@@ -5,5 +5,5 @@ namespace RaspberryPi.API.Services;
 
 public interface ILedService {
 	void SetColor(LedColor color);
-	void SetEffect(Effect effect);
+	Task SetEffect(Effect effect);
 }

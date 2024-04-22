@@ -4,8 +4,6 @@ using RaspberryPi.API.Gpio;
 using RaspberryPi.API.Gpio.Pwm;
 using RaspberryPi.API.Models;
 using RaspberryPi.API.Options;
-using System.Timers;
-using Timer = System.Timers.Timer;
 
 namespace RaspberryPi.API.Services;
 
@@ -15,13 +13,14 @@ public interface IRaspberryLedService : ILedService {
 public class RaspberryLedService
 	: IRaspberryLedService, IDisposable {
 	private readonly IGpioControllerProvider _controller;
-	private readonly Timer _updateTimer;
 	private readonly PinOptions _pinOptions;
 	private readonly LedOptions _ledOptions;
 	private readonly List<IPwmChannelProvider> _pwmChannels;
 	private RainbowStage _rainbowStage;
 	private LedColor _currentColor;
 	private Effect? _currentEffect;
+	private Task _effectTask;
+	private CancellationTokenSource? _cts;
 
 	public RaspberryLedService(IOptions<PinOptions> pinOptions, IOptions<LedOptions> ledOptions, IGpioControllerProvider controller) {
 		_controller = controller;
@@ -34,13 +33,9 @@ public class RaspberryLedService
 		};
 		_pwmChannels = [];
 		_rainbowStage = RainbowStage.Red;
+		_cts = new CancellationTokenSource();
+		_effectTask = new Task(ProcessEffect);
 		InitializePwmChannels();
-
-		_updateTimer = new Timer(_ledOptions.RefreshPeriod) {
-			AutoReset = true,
-			Enabled = true
-		};
-		_updateTimer.Elapsed += Update;
 	}
 
 	private void InitializePwmChannels() {
@@ -50,11 +45,8 @@ public class RaspberryLedService
 		_pwmChannels.Add(_controller.GetPwmChannel(1, _pinOptions.BluePinNumber, _pinOptions.PwmFrequency, 0));
 	}
 
-	private void Update(object? sender, ElapsedEventArgs e) {
+	private void ProcessEffect() {
 		switch (_currentEffect) {
-			case Effect.Solid:
-				UpdateSolidColor();
-				break;
 			case Effect.Pulse:
 				UpdatePulse();
 				break;
@@ -70,34 +62,77 @@ public class RaspberryLedService
 	}
 
 	private void UpdateSolidColor() {
-		_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * 100.0;
-		_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * 100.0;
-		_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * 100.0;
+		_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0;
+		_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0;
+		_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0;
 	}
 
 	private void UpdatePulse() {
-		throw new NotImplementedException();
+		CancellationToken token = _cts!.Token;
+		while (token.IsCancellationRequested == false) {
+			_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0;
+			_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0;
+			_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0;
+			Thread.Sleep(500);
+			_pwmChannels[0].DutyCycle = 0;
+			_pwmChannels[1].DutyCycle = 0;
+			_pwmChannels[2].DutyCycle = 0;
+			Thread.Sleep(500);
+		}
 	}
 
 	private void UpdateFade() {
-		throw new NotImplementedException();
+		CancellationToken token = _cts!.Token;
+		while (token.IsCancellationRequested == false) {
+			for (int i = 0; i <= 100; i++) {
+				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0);
+				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0);
+				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0);
+				Thread.Sleep(5);
+			}
+			for (int i = 100; i >= 0; i--) {
+				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0);
+				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0);
+				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0);
+				Thread.Sleep(5);
+			}
+		}
 	}
 
 	private void UpdateRainbow() {
-		throw new NotImplementedException();
+		CancellationToken token = _cts!.Token;
+		while (token.IsCancellationRequested == false) {
+
+		}
 	}
 
 	public void SetColor(LedColor color) {
 		_currentColor = color;
 	}
 
-	public void SetEffect(Effect effect) {
+	public async Task SetEffect(Effect effect) {
+		if (_effectTask != null) {
+			_cts!.Cancel();
+			await _effectTask;
+			_cts.Dispose();
+			_cts = null;
+		}
+
 		_currentEffect = effect;
+		if (_currentEffect != Effect.Solid) {
+			_effectTask = Task.Run(ProcessEffect);
+		}
+		else {
+			UpdateSolidColor();
+		}
 	}
 
 	public void Dispose() {
 		GC.SuppressFinalize(this);
-		_updateTimer.Stop();
-		_updateTimer.Dispose();
+		if (_effectTask != null) {
+			_cts!.Cancel();
+			_effectTask.GetAwaiter().GetResult();
+			_cts.Dispose();
+		}
 	}
 }
