@@ -85,8 +85,12 @@ public class GpioControllerProvider : IGpioControllerProvider, IDisposable {
 		return _controller.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
 	}
 
-	public IPwmChannelProvider GetPwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage) {
-		return new PwmChannelProvider(chip, channel, frequency, dutyCyclePercentage);
+	public IPwmChannelProvider GetPwmChannel(int chip, int channel, int frequency, double dutyCyclePercent) {
+		return new PwmChannelProvider(chip, channel, frequency, dutyCyclePercent);
+	}
+
+	public IPwmChannelProvider GetSoftwarePwmChannel(int channel, int frequency, double dutyCyclePercent) {
+		return new SoftwarePwmChannelProvider(_controller, channel, frequency, dutyCyclePercent);
 	}
 
 	public void Dispose() {

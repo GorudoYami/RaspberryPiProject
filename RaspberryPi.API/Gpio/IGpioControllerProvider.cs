@@ -8,6 +8,7 @@ public interface IGpioControllerProvider {
 	void ClosePin(int pinNumber);
 	PinMode GetPinMode(int pinNumber);
 	IPwmChannelProvider GetPwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage);
+	IPwmChannelProvider GetSoftwarePwmChannel(int channel, int frequency, double dutyCyclePercent);
 	bool IsPinModeSupported(int pinNumber, PinMode mode);
 	GpioPin OpenPin(int pinNumber);
 	GpioPin OpenPin(int pinNumber, PinMode pinMode);

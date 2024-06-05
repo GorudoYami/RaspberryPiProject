@@ -1,8 +1,10 @@
-﻿using System.Device.Pwm;
+﻿using System.Device.Gpio;
+using System.Device.Pwm;
+using System.Device.Pwm.Drivers;
 
 namespace RaspberryPi.API.Gpio.Pwm;
 
-public class PwmChannelProvider(int chip, int channel, int frequency, double dutyCyclePercent)
+public class SoftwarePwmChannelProvider(GpioController controller, int channel, int frequency, double dutyCyclePercent)
 	: IPwmChannelProvider {
 	public int Frequency {
 		get => _channel.Frequency;
@@ -12,8 +14,7 @@ public class PwmChannelProvider(int chip, int channel, int frequency, double dut
 		get => _channel.DutyCycle;
 		set => _channel.DutyCycle = value;
 	}
-
-	private readonly PwmChannel _channel = PwmChannel.Create(chip, channel, frequency, dutyCyclePercent);
+	private readonly PwmChannel _channel = new SoftwarePwmChannel(channel, frequency, dutyCyclePercent, controller: controller);
 
 	public void Start() {
 		_channel.Start();

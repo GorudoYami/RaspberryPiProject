@@ -40,9 +40,9 @@ public class RaspberryLedService
 
 	private void InitializePwmChannels() {
 		_pwmChannels.Clear();
-		_pwmChannels.Add(_controller.GetPwmChannel(1, _pinOptions.RedPinNumber, _pinOptions.PwmFrequency, 0));
-		_pwmChannels.Add(_controller.GetPwmChannel(1, _pinOptions.GreenPinNumber, _pinOptions.PwmFrequency, 0));
-		_pwmChannels.Add(_controller.GetPwmChannel(1, _pinOptions.BluePinNumber, _pinOptions.PwmFrequency, 0));
+		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.RedPinNumber, _pinOptions.PwmFrequency, 0));
+		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.GreenPinNumber, _pinOptions.PwmFrequency, 0));
+		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.BluePinNumber, _pinOptions.PwmFrequency, 0));
 	}
 
 	private void ProcessEffect() {
