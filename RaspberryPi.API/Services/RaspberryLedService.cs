@@ -14,25 +14,21 @@ public class RaspberryLedService
 	: IRaspberryLedService, IDisposable {
 	private readonly IGpioControllerProvider _controller;
 	private readonly PinOptions _pinOptions;
-	private readonly LedOptions _ledOptions;
 	private readonly List<IPwmChannelProvider> _pwmChannels;
-	private RainbowStage _rainbowStage;
 	private LedColor _currentColor;
 	private Effect? _currentEffect;
 	private Task _effectTask;
 	private CancellationTokenSource? _cts;
 
-	public RaspberryLedService(IOptions<PinOptions> pinOptions, IOptions<LedOptions> ledOptions, IGpioControllerProvider controller) {
+	public RaspberryLedService(IOptions<PinOptions> pinOptions, IGpioControllerProvider controller) {
 		_controller = controller;
 		_pinOptions = pinOptions.Value;
-		_ledOptions = ledOptions.Value;
 		_currentColor = new LedColor() {
 			Red = 255,
 			Green = 255,
 			Blue = 255
 		};
 		_pwmChannels = [];
-		_rainbowStage = RainbowStage.Red;
 		_cts = new CancellationTokenSource();
 		_effectTask = new Task(ProcessEffect);
 		InitializePwmChannels();
@@ -61,7 +57,7 @@ public class RaspberryLedService
 		}
 	}
 
-	private void UpdateSolidColor() {
+	private void UpdateColor() {
 		_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0;
 		_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0;
 		_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0;
@@ -102,7 +98,27 @@ public class RaspberryLedService
 	private void UpdateRainbow() {
 		CancellationToken token = _cts!.Token;
 		while (token.IsCancellationRequested == false) {
+			if (_currentColor.Red == 255 && _currentColor.Green < 255 && _currentColor.Blue == 0) {
+				_currentColor.Green += 1;
+			}
+			else if (_currentColor.Green == 255 && _currentColor.Red > 0 && _currentColor.Blue == 0) {
+				_currentColor.Red -= 1;
+			}
+			else if (_currentColor.Green == 255 && _currentColor.Blue < 255 && _currentColor.Red == 0) {
+				_currentColor.Blue += 1;
+			}
+			else if (_currentColor.Blue == 255 && _currentColor.Green > 0 && _currentColor.Red == 0) {
+				_currentColor.Green -= 1;
+			}
+			else if (_currentColor.Blue == 255 && _currentColor.Red < 255 && _currentColor.Green == 0) {
+				_currentColor.Red += 1;
+			}
+			else if (_currentColor.Red == 255 && _currentColor.Blue > 0 && _currentColor.Green == 0) {
+				_currentColor.Blue -= 1;
+			}
 
+			UpdateColor();
+			Thread.Sleep(5);
 		}
 	}
 
@@ -123,7 +139,7 @@ public class RaspberryLedService
 			_effectTask = Task.Run(ProcessEffect);
 		}
 		else {
-			UpdateSolidColor();
+			UpdateColor();
 		}
 	}
 
