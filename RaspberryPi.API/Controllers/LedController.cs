@@ -3,7 +3,6 @@ using RaspberryPi.API.Enums;
 using RaspberryPi.API.Models;
 using RaspberryPi.API.Resolvers;
 using RaspberryPi.API.Services;
-using System.Net;
 
 namespace RaspberryPi.API.Controllers;
 
@@ -14,15 +13,15 @@ public class LedController(ILedServiceResolver ledServiceResolver) : ControllerB
 
 	[HttpPost("effect")]
 	[ProducesResponseType(200)]
-	public ActionResult SetEffect(Effect effect) {
-		_ledService.SetEffect(effect);
+	public async Task<ActionResult> SetEffectAsync(Effect effect) {
+		await _ledService.SetEffectAsync(effect);
 		return Ok();
 	}
 
 	[HttpPost("color")]
 	[ProducesResponseType(200)]
-	public ActionResult SetColor(LedColor color) {
-		_ledService.SetColor(color);
+	public async Task<ActionResult> SetColorAsync(LedColor color) {
+		await _ledService.SetColorAsync(color);
 		return Ok();
 	}
 }

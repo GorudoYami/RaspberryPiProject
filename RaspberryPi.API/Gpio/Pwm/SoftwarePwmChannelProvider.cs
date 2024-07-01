@@ -14,6 +14,7 @@ public class SoftwarePwmChannelProvider(GpioController controller, int channel, 
 		get => _channel.DutyCycle;
 		set => _channel.DutyCycle = value;
 	}
+
 	private readonly PwmChannel _channel = new SoftwarePwmChannel(channel, frequency, dutyCyclePercent, controller: controller);
 
 	public void Start() {

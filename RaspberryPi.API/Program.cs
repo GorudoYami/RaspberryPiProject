@@ -19,9 +19,6 @@ builder.Services
 builder.Services.AddOptions<PinOptions>()
 	.Bind(builder.Configuration.GetRequiredSection(nameof(PinOptions)))
 	.ValidateOnStart();
-builder.Services.AddOptions<LedOptions>()
-	.Bind(builder.Configuration.GetRequiredSection(nameof(LedOptions)))
-	.ValidateOnStart();
 
 var app = builder.Build();
 

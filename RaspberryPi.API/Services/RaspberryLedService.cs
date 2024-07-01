@@ -39,6 +39,8 @@ public class RaspberryLedService
 		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.RedPinNumber, _pinOptions.PwmFrequency, 0));
 		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.GreenPinNumber, _pinOptions.PwmFrequency, 0));
 		_pwmChannels.Add(_controller.GetSoftwarePwmChannel(_pinOptions.BluePinNumber, _pinOptions.PwmFrequency, 0));
+
+		_pwmChannels.ForEach(pwmChannel => pwmChannel.Start());
 	}
 
 	private void ProcessEffect() {
@@ -122,12 +124,18 @@ public class RaspberryLedService
 		}
 	}
 
-	public void SetColor(LedColor color) {
+	public async Task SetColorAsync(LedColor color) {
 		_currentColor = color;
+		if (_currentEffect != Effect.Solid) {
+			await SetEffectAsync(Effect.Solid);
+		}
+		else {
+			UpdateColor();
+		}
 	}
 
-	public async Task SetEffect(Effect effect) {
-		if (_effectTask != null) {
+	public async Task SetEffectAsync(Effect effect) {
+		if (_effectTask?.Status == TaskStatus.Running) {
 			_cts!.Cancel();
 			await _effectTask;
 			_cts.Dispose();
@@ -145,10 +153,12 @@ public class RaspberryLedService
 
 	public void Dispose() {
 		GC.SuppressFinalize(this);
-		if (_effectTask != null) {
+		if (_effectTask?.Status == TaskStatus.Running) {
 			_cts!.Cancel();
 			_effectTask.GetAwaiter().GetResult();
 			_cts.Dispose();
 		}
+		_pwmChannels.ForEach(x => x.Stop());
+		_pwmChannels.ForEach(x => x.Dispose());
 	}
 }

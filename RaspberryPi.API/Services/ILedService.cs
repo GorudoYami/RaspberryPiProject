@@ -4,6 +4,6 @@ using RaspberryPi.API.Models;
 namespace RaspberryPi.API.Services;
 
 public interface ILedService {
-	void SetColor(LedColor color);
-	Task SetEffect(Effect effect);
+	Task SetColorAsync(LedColor color);
+	Task SetEffectAsync(Effect effect);
 }
