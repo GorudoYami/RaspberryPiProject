@@ -13,8 +13,8 @@ public class LedController(ILedServiceResolver ledServiceResolver) : ControllerB
 
 	[HttpPost("effect")]
 	[ProducesResponseType(200)]
-	public async Task<ActionResult> SetEffectAsync(Effect effect) {
-		await _ledService.SetEffectAsync(effect);
+	public async Task<ActionResult> SetEffectAsync([FromBody] int effect) {
+		await _ledService.SetEffectAsync((Effect)effect);
 		return Ok();
 	}
 

@@ -118,6 +118,9 @@ public class RaspberryLedService
 			else if (_currentColor.Red == 255 && _currentColor.Blue > 0 && _currentColor.Green == 0) {
 				_currentColor.Blue -= 1;
 			}
+			else {
+				_currentColor.Red -= 1;
+			}
 
 			UpdateColor();
 			Thread.Sleep(5);
@@ -126,7 +129,7 @@ public class RaspberryLedService
 
 	public async Task SetColorAsync(LedColor color) {
 		_currentColor = color;
-		if (_currentEffect != Effect.Solid) {
+		if (_currentEffect is Effect.Rainbow) {
 			await SetEffectAsync(Effect.Solid);
 		}
 		else {
@@ -144,7 +147,8 @@ public class RaspberryLedService
 
 		_currentEffect = effect;
 		if (_currentEffect != Effect.Solid) {
-			_effectTask = Task.Run(ProcessEffect);
+			_cts = new CancellationTokenSource();
+			_effectTask = Task.Run(ProcessEffect, _cts.Token);
 		}
 		else {
 			UpdateColor();
