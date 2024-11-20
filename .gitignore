@@ -362,3 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /RaspberryPi.API/.config/dotnet-tools.json
+
+*.db
+*.db-shm
+*.db-wal

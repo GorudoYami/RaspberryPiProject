@@ -18,6 +18,7 @@ public class ScheduleController(IWeekScheduleRepository weekScheduleRepository)
 	}
 
 	[HttpGet("{id}")]
+	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<ActionResult<WeekSchedule>> GetAsync(int id) {
 		WeekSchedule? weekSchedule = await _weekScheduleRepository.GetAsync(id, HttpContext.RequestAborted);
 		if (weekSchedule == null) {
@@ -28,12 +29,14 @@ public class ScheduleController(IWeekScheduleRepository weekScheduleRepository)
 	}
 
 	[HttpPost]
+	[ProducesResponseType((int)HttpStatusCode.BadRequest)]
 	public async Task<ActionResult<WeekSchedule>> CreateAsync(CreateWeekScheduleDto weekScheduleDto) {
 		var weekSchedule = new WeekSchedule() {
 			Hour = weekScheduleDto.Hour,
 			Minute = weekScheduleDto.Minute,
 			Second = weekScheduleDto.Second,
 			Day = weekScheduleDto.Day,
+			Action = weekScheduleDto.Action,
 		};
 
 		try {
@@ -47,6 +50,7 @@ public class ScheduleController(IWeekScheduleRepository weekScheduleRepository)
 	}
 
 	[HttpDelete("{id}")]
+	[ProducesResponseType((int)HttpStatusCode.NotFound)]
 	public async Task<IActionResult> DeleteAsync(int id) {
 		try {
 			await _weekScheduleRepository.DeleteAsync(id, HttpContext.RequestAborted);

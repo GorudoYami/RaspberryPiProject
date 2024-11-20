@@ -16,21 +16,20 @@ namespace RaspberryPi.API.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Hour = table.Column<int>(type: "INTEGER", nullable: false),
-                    Minute = table.Column<int>(type: "INTEGER", nullable: false),
+                    Hour = table.Column<int>(type: "INTEGER", nullable: true),
+                    Minute = table.Column<int>(type: "INTEGER", nullable: true),
                     Second = table.Column<int>(type: "INTEGER", nullable: false),
-                    Day = table.Column<int>(type: "INTEGER", nullable: false)
+                    Day = table.Column<int>(type: "INTEGER", nullable: true),
+                    Action = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WeekSchedule", x => x.Id);
+                    table.CheckConstraint("CK_WeekSchedule_Day_Range", "Day BETWEEN 0 AND 6");
+                    table.CheckConstraint("CK_WeekSchedule_Hour_Range", "Hour BETWEEN 0 AND 23");
+                    table.CheckConstraint("CK_WeekSchedule_Minute_Range", "Minute BETWEEN 0 AND 59");
+                    table.CheckConstraint("CK_WeekSchedule_Second_Range", "Second BETWEEN 0 AND 59");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WeekSchedule_Day_Hour_Minute_Second",
-                table: "WeekSchedule",
-                columns: new[] { "Day", "Hour", "Minute", "Second" },
-                unique: true);
         }
 
         /// <inheritdoc />

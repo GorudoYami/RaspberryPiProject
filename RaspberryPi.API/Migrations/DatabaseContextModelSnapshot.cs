@@ -22,13 +22,16 @@ namespace RaspberryPi.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Day")
+                    b.Property<int>("Action")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Hour")
+                    b.Property<int?>("Day")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Minute")
+                    b.Property<int?>("Hour")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Minute")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Second")
@@ -36,10 +39,16 @@ namespace RaspberryPi.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Day", "Hour", "Minute", "Second")
-                        .IsUnique();
+                    b.ToTable("WeekSchedule", t =>
+                        {
+                            t.HasCheckConstraint("CK_WeekSchedule_Day_Range", "Day BETWEEN 0 AND 6");
 
-                    b.ToTable("WeekSchedule");
+                            t.HasCheckConstraint("CK_WeekSchedule_Hour_Range", "Hour BETWEEN 0 AND 23");
+
+                            t.HasCheckConstraint("CK_WeekSchedule_Minute_Range", "Minute BETWEEN 0 AND 59");
+
+                            t.HasCheckConstraint("CK_WeekSchedule_Second_Range", "Second BETWEEN 0 AND 59");
+                        });
                 });
 #pragma warning restore 612, 618
         }

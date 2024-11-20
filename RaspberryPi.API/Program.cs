@@ -14,7 +14,7 @@ builder.Services
 	.AddSwaggerGen();
 
 builder.Services
-	.AddDbContext<DatabaseContext>(options => options.UseSqlite("Data Source=D:\\test.db"))
+	.AddDbContext<DatabaseContext>(options => options.UseSqlite(@"Data Source=Database\Database.db"))
 	.AddSingleton<ITestLedService, TestLedService>()
 	.AddSingleton<IRaspberryLedService, RaspberryLedService>()
 	.AddSingleton<ILedServiceResolver, LedServiceResolver>()

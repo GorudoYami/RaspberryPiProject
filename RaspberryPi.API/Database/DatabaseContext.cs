@@ -9,7 +9,12 @@ public class DatabaseContext(DbContextOptions<DatabaseContext> options) : DbCont
 	protected override void OnModelCreating(ModelBuilder modelBuilder) {
 		modelBuilder.Entity<WeekSchedule>(entity => {
 			entity.HasKey(e => e.Id);
-			entity.HasIndex(e => new { e.Day, e.Hour, e.Minute, e.Second }).IsUnique();
+			entity.ToTable(table => {
+				table.HasCheckConstraint("CK_WeekSchedule_Hour_Range", "Hour BETWEEN 0 AND 23");
+				table.HasCheckConstraint("CK_WeekSchedule_Minute_Range", "Minute BETWEEN 0 AND 59");
+				table.HasCheckConstraint("CK_WeekSchedule_Second_Range", "Second BETWEEN 0 AND 59");
+				table.HasCheckConstraint("CK_WeekSchedule_Day_Range", "Day BETWEEN 0 AND 6");
+			});
 		});
 	}
 }
