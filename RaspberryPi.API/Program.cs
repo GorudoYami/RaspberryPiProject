@@ -1,5 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using RaspberryPi.API.Database;
 using RaspberryPi.API.Gpio;
 using RaspberryPi.API.Options;
+using RaspberryPi.API.Repositories;
 using RaspberryPi.API.Resolvers;
 using RaspberryPi.API.Services;
 
@@ -11,10 +14,12 @@ builder.Services
 	.AddSwaggerGen();
 
 builder.Services
+	.AddDbContext<DatabaseContext>(options => options.UseSqlite("Data Source=D:\\test.db"))
 	.AddSingleton<ITestLedService, TestLedService>()
 	.AddSingleton<IRaspberryLedService, RaspberryLedService>()
 	.AddSingleton<ILedServiceResolver, LedServiceResolver>()
-	.AddSingleton<IGpioControllerProvider, GpioControllerProvider>();
+	.AddSingleton<IGpioControllerProvider, GpioControllerProvider>()
+	.AddTransient<IWeekScheduleRepository, WeekScheduleDbRepository>();
 
 builder.Services.AddOptions<PinOptions>()
 	.Bind(builder.Configuration.GetRequiredSection(nameof(PinOptions)))
@@ -25,6 +30,13 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
 	app.UseSwagger();
 	app.UseSwaggerUI();
+}
+
+using (IServiceScope scope = app.Services.CreateScope()) {
+
+	var databaseContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+	databaseContext.Database.Migrate();
+	databaseContext.SaveChanges();
 }
 
 app.MapControllers();
