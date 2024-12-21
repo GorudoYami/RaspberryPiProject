@@ -37,6 +37,7 @@ public class ScheduleController(IWeekScheduleRepository weekScheduleRepository)
 			Second = weekScheduleDto.Second,
 			Day = weekScheduleDto.Day,
 			Action = weekScheduleDto.Action,
+			Name= weekScheduleDto.Name,
 		};
 
 		try {
