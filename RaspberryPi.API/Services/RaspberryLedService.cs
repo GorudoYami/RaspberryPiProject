@@ -12,9 +12,15 @@ public interface IRaspberryLedService : ILedService {
 
 public class RaspberryLedService
 	: IRaspberryLedService, IDisposable {
+	public bool Enabled {
+		get => (int)Math.Round(_active, 0) == 1;
+		set => _active = value ? 1 : 0;
+	}
+
 	private readonly IGpioControllerProvider _controller;
 	private readonly PinOptions _pinOptions;
 	private readonly List<IPwmChannelProvider> _pwmChannels;
+	private double _active;
 	private LedColor _currentColor;
 	private Effect? _currentEffect;
 	private Task _effectTask;
@@ -28,6 +34,7 @@ public class RaspberryLedService
 			Green = 255,
 			Blue = 255
 		};
+		_active = 1;
 		_pwmChannels = [];
 		_cts = new CancellationTokenSource();
 		_effectTask = new Task(ProcessEffect);
@@ -60,17 +67,17 @@ public class RaspberryLedService
 	}
 
 	private void UpdateColor() {
-		_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0;
-		_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0;
-		_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0;
+		_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * _active;
+		_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * _active;
+		_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * _active;
 	}
 
 	private void UpdatePulse() {
 		CancellationToken token = _cts!.Token;
 		while (token.IsCancellationRequested == false) {
-			_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0;
-			_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0;
-			_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0;
+			_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * _active;
+			_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * _active;
+			_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * _active;
 			Thread.Sleep(500);
 			_pwmChannels[0].DutyCycle = 0;
 			_pwmChannels[1].DutyCycle = 0;
@@ -83,15 +90,15 @@ public class RaspberryLedService
 		CancellationToken token = _cts!.Token;
 		while (token.IsCancellationRequested == false) {
 			for (int i = 0; i <= 100; i++) {
-				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0);
-				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0);
-				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0);
+				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0) * _active;
+				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0) * _active;
+				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0) * _active;
 				Thread.Sleep(5);
 			}
 			for (int i = 100; i >= 0; i--) {
-				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0);
-				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0);
-				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0);
+				_pwmChannels[0].DutyCycle = _currentColor.Red / 255.0 * (i / 100.0) * _active;
+				_pwmChannels[1].DutyCycle = _currentColor.Green / 255.0 * (i / 100.0) * _active;
+				_pwmChannels[2].DutyCycle = _currentColor.Blue / 255.0 * (i / 100.0) * _active;
 				Thread.Sleep(5);
 			}
 		}

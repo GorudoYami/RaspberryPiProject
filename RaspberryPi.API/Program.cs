@@ -19,6 +19,7 @@ builder.Services
 	.AddSingleton<IRaspberryLedService, RaspberryLedService>()
 	.AddSingleton<ILedServiceResolver, LedServiceResolver>()
 	.AddSingleton<IGpioControllerProvider, GpioControllerProvider>()
+	.AddHostedService<ScheduleService>()
 	.AddTransient<IWeekScheduleRepository, WeekScheduleDbRepository>();
 
 builder.Services.AddOptions<PinOptions>()

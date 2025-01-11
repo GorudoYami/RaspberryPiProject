@@ -9,6 +9,18 @@ public interface ITestLedService : ILedService {
 
 public class TestLedService
 	: ITestLedService {
+	public bool Enabled {
+		get {
+			Debug.WriteLine($"[{nameof(TestLedService)}]: Enabled {_enabled}");
+			return _enabled;
+		}
+		set {
+			Debug.WriteLine($"[{nameof(TestLedService)}]: Set Enabled {value}");
+			_enabled = value;
+		}
+	}
+	private bool _enabled;
+
 	public Task SetColorAsync(LedColor color) {
 		Debug.WriteLine($"[{nameof(TestLedService)}]: SetColor {color}");
 		return Task.CompletedTask;
